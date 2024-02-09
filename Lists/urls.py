@@ -18,6 +18,6 @@ urlpatterns = [
     path('update/<int:list_id>/', views.update_list, name='update_list'),
 
     #A user can Like a list 
-    path('like_list/<int:list_id>', views.like_list, name='like_list'),
+    path('like_list/', views.like_list, name='like_list'),
 ]
 

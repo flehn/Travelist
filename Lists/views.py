@@ -21,13 +21,36 @@ from rest_framework import viewsets
 from .serializer import ListSerializer, ElementSerializer
 
 
+import jwt
+
+#Get the access token from user auth via request and decode the JWT format 
+def get_acces_token_from_request(request):
+    authorization_header = request.headers.get('Authorization', '')
+    if authorization_header.startswith('Bearer '):
+        key = authorization_header.split(' ')[1]
+            
+    return decode_jwt_token(key)
+    
+def decode_jwt_token(token: str):
+    """
+    :param token: jwt token
+    :return:
+    """
+    print(dir(jwt))
+    print("----------")
+    decoded_data = jwt.decode(jwt=token,
+                              key='secret',
+                              algorithms=["HS256"])
+
+    return decoded_data
+
 @api_view(['POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def create_list_with_element(request):
 
     print(f'request.header: {request.headers}')  # Debug: Print the request headers
     print(f'request.user: {request.user}')  # Debug: Print the user object
-
+    print(f'request.auth: {request.auth}') #instance of the token that the request was authenticated against. If the request is unauthenticated, or if no additional context is present, the default value of request.auth is None
 
     if request.method == 'POST':
         list_data = request.data.get('list')
@@ -53,9 +76,6 @@ def create_list_with_element(request):
             return Response({'error': 'At least one element needs to be added'}, 
                             status=status.HTTP_400_BAD_REQUEST)
         
-                    
-  
-
         if list_serializer.is_valid():
             list_serializer.save()
 
@@ -190,22 +210,19 @@ def update_list(request, list_id):
 
 
 
-
-
-
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def like_list(request, list_id):
+def like_list(request):
     '''
     this function adds the like function, a user can like a list, if he clicks again, his like is removed. 
     Only Logged In users can like a list. 
     '''
     if request.method == 'POST':
         user = request.user
-        list_id = request.data.get('list')
-        list_obj = TList.objects.get(id=list_id['id'])
+        list = request.data.get('list')
+        list_obj = TList.objects.get(id=list['id'])
+
+
 
         if user in list_obj.likes.all():
             list_obj.likes.remove(user)

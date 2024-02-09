@@ -30,7 +30,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+ENV_ROLE = os.getenv('DJANGO_ENV_ROLE', 'development') #default is development
+
+if ENV_ROLE == 'production':
+    DEBUG = False
+elif ENV_ROLE == 'development':
+    DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -45,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    #'rest_framework.authtoken' #TokenAuthentication: https://www.django-rest-framework.org/api-guide/authentication/
     'rest_framework_simplejwt', #UserAuthentification ( Simple JWT package)
     'corsheaders', #for CORS 
     'Users',
@@ -63,11 +69,15 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-'DEFAULT_AUTHENTICATION _CLASSES': [
-    'rest_framework_simplejwt.authentication.JWAuthentication'
-    ],
-    
+
+'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+        #'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+    ]
 }
+
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -106,8 +116,6 @@ WSGI_APPLICATION = 'Travellist_django.wsgi.application'
 # Get an environment variable to determine which settings to use:
 #For Localtest purposes we use 'development' which just uses a simple Sqlite3 DB. 
 #For production we have to set the env DJANGO_ENV_ROLE to 'production' and then we use postgresql
-ENV_ROLE = os.getenv('DJANGO_ENV_ROLE', 'development')
-
 if ENV_ROLE == 'production':
     DATABASES = {
         'default': {
